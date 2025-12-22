@@ -1,0 +1,25 @@
+# Ambiente virtual
+venv/
+
+# Variáveis sensíveis
+.env
+
+# Cache Python
+__pycache__/
+*.pyc
+
+# Modelos grandes
+*.pt
+
+# Vídeos e imagens gerados
+*.mp4
+*.avi
+*.jpg
+*.png
+
+# Logs
+*.log
+
+# Arquivos temporários
+*.save
+
