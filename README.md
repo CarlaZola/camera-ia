@@ -8,9 +8,7 @@ Sistema de detecção de movimento e objetos usando YOLOv8 com envio de alertas 
 - Gravação de eventos
 - Snapshot e vídeo no Discord
 
-## Execução
-```bash
-python camera_ia_rtsp.py
+(づ￣ 3￣)づ
 
 
 
