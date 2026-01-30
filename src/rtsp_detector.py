@@ -15,9 +15,15 @@ RTSP_VIEW = build_rtsp("/cam/realmonitor?channel=1&subtype=0")
 # GPU / MODELO
 # ======================
 print("CUDA disponível:", torch.cuda.is_available())
-print("GPU:", torch.cuda.get_device_name(0))
 
-model = YOLO(YOLO_MODEL).to("cuda")
+if torch.cuda.is_available():
+    device = "cuda"
+    print("GPU:", torch.cuda.get_device_name(0))
+else:
+    device = "cpu"
+    print("Usando CPU")
+
+model = YOLO(YOLO_MODEL).to(device)
 
 # ======================
 # CAMERAS
@@ -41,8 +47,13 @@ prev_time = time.time()
 # ======================
 # REDE
 # ======================
+
+
 def total_bytes_recv():
-    return sum(i.bytes_recv for i in psutil.net_io_counters(pernic=True).values())
+    return sum(
+        i.bytes_recv for i in psutil.net_io_counters(pernic=True).values()
+    )
+
 
 net_prev = total_bytes_recv()
 net_prev_time = time.time()
@@ -73,25 +84,30 @@ while True:
         if cls in ["person", "car", "truck", "bus", "motorcycle"]:
             x1, y1, x2, y2 = box.xyxy[0]
             x1, y1, x2, y2 = int(x1*sx), int(y1*sy), int(x2*sx), int(y2*sy)
-            cv2.rectangle(frame_view, (x1,y1), (x2,y2), (0,255,0), 2)
+            cv2.rectangle(frame_view, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
     net_now = total_bytes_recv()
     net_now_time = time.time()
-    mbps = ((net_now - net_prev) * 8) / max((net_now_time - net_prev_time) * 1024 * 1024, 1e-6)
+    mbps = ((net_now - net_prev) * 8) / \
+        max((net_now_time - net_prev_time) * 1024 * 1024, 1e-6)
     net_prev, net_prev_time = net_now, net_now_time
 
-    gpu_mem = torch.cuda.memory_allocated() / 1024 / 1024
-    gpu_total = torch.cuda.get_device_properties(0).total_memory / 1024 / 1024
+    if torch.cuda.is_available():
+        gpu_mem = torch.cuda.memory_allocated() / 1024 / 1024
+        gpu_total = torch.cuda.get_device_properties(
+            0).total_memory / 1024 / 1024
+        gpu_info = f"GPU VRAM: {gpu_mem:.0f}/{gpu_total:.0f} MB"
+    else:
+        gpu_info = "GPU: N/A (CPU)"
 
     overlay = [
         f"FPS IA: {fps:.1f}",
         f"Latência RTSP: {latency_ms:.0f} ms",
         f"Rede: {mbps:.2f} Mbps",
-        f"GPU VRAM: {gpu_mem:.0f}/{gpu_total:.0f} MB",
+        gpu_info,
         "Status: ONLINE",
     ]
 
     for i, text in enumerate(overlay):
         cv2.putText(frame_view, text, (20, 30 + i * 26),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,255), 2
-
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)

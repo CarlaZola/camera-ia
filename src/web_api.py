@@ -22,8 +22,11 @@ app = Flask(__name__)
 # ======================
 # AUTH BASIC
 # ======================
+
+
 def check_auth(username, password):
     return username == WEB_USER and password == WEB_PASSWORD
+
 
 def authenticate():
     return Response(
@@ -31,6 +34,7 @@ def authenticate():
         401,
         {"WWW-Authenticate": 'Basic realm="Camera IA"'},
     )
+
 
 def requires_auth(f):
     @wraps(f)
@@ -40,6 +44,7 @@ def requires_auth(f):
             return authenticate()
         return f(*args, **kwargs)
     return decorated
+
 
 # ======================
 # GPU / MODELO
@@ -60,13 +65,15 @@ if not cap.isOpened():
 # ======================
 # STREAM MJPEG
 # ======================
+
+
 def gerar_frames():
     while True:
         ret, frame = cap.read()
         if not ret:
             break
 
-        results = model(frame, device=0, verbose=False)[0]
+        results = model(frame, device=device, verbose=False)[0]
 
         for box in results.boxes:
             cls = results.names[int(box.cls[0])]
@@ -99,6 +106,8 @@ def gerar_frames():
 # ======================
 # ROTAS
 # ======================
+
+
 @app.route("/")
 @requires_auth
 def index():
@@ -112,6 +121,7 @@ def index():
     </html>
     """
 
+
 @app.route("/video")
 @requires_auth
 def video():
@@ -120,10 +130,10 @@ def video():
         mimetype="multipart/x-mixed-replace; boundary=frame",
     )
 
+
 # ======================
 # START
 # ======================
 if __name__ == "__main__":
     print(f"🌐 Acesse: http://SEU_IP:{WEB_PORT}")
     app.run(host=WEB_HOST, port=WEB_PORT, threaded=True)
-

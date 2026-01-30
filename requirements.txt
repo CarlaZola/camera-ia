@@ -47,7 +47,7 @@ setuptools==80.9.0
 six==1.17.0
 sympy==1.14.0
 torch==2.9.1
-torchvision==0.24.1
+torchvision==0.26.1
 triton==3.5.1
 typing_extensions==4.15.0
 ultralytics==8.3.240

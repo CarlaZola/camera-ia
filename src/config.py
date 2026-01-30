@@ -20,8 +20,12 @@ YOLO_MODEL = os.getenv("YOLO_MODEL", "yolov8n.pt")
 RTSP_IA = os.getenv("RTSP_IA")
 RTSP_VIEW = os.getenv("RTSP_VIEW")
 
-WEB_HOST = os.getenv("WEB_HOST")
-WEB_PORT = int(os.getenv("WEB_PORT"))
+WEB_HOST = os.getenv("WEB_HOST", "0.0.0.0")
+WEB_PORT = int(os.getenv("WEB_PORT", 5000))
+WEB_USER = os.getenv("WEB_USER", "admin")
+WEB_PASSWORD = os.getenv("WEB_PASSWORD", "admin")
+
+MODEL_PATH = os.getenv("MODEL_PATH", "yolov8n.pt")
 
 IA_WIDTH = int(os.getenv("IA_WIDTH", 704))
 IA_HEIGHT = int(os.getenv("IA_HEIGHT", 480))
@@ -35,6 +39,7 @@ ALERTA_COOLDOWN = int(os.getenv("ALERTA_COOLDOWN", 50))
 CLASSES_ALERTA = ["person", "car", "motorcycle", "bus", "truck"]
 MOVIMENTO_MIN_AREA = 8000
 JANELA_EVENTO = 3
+
 
 def build_rtsp(path: str) -> str:
     return f"rtsp://{RTSP_USER}:{RTSP_PASS}@{RTSP_HOST}:{RTSP_PORT}{path}"

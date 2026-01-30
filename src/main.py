@@ -2,7 +2,7 @@ import cv2
 import time
 import os
 import requests
-import numpy as np
+import torch
 from datetime import datetime
 from ultralytics import YOLO
 
@@ -42,6 +42,8 @@ ultimo_alerta = 0
 # ======================
 # FUNÇÕES DISCORD
 # ======================
+
+
 def enviar_snapshot_discord(frame, classe, confianca):
     global ultimo_alerta
     agora = time.time()
@@ -72,6 +74,7 @@ def enviar_snapshot_discord(frame, classe, confianca):
     finally:
         os.remove(nome_img)
 
+
 def enviar_video_discord(nome_video, classe):
     mensagem = (
         f"🎥 **Vídeo do Evento**\n"
@@ -93,13 +96,14 @@ def enviar_video_discord(nome_video, classe):
             os.remove(nome_video)
             print("🗑 Vídeo removido")
 
+
 # ======================
 # MODELO IA
 # ======================
 model = YOLO("models/yolov8n.pt")
-device = "cuda" if cv2.cuda.getCudaEnabledDeviceCount() > 0 else "cpu"
+device = "cuda" if torch.cuda.is_available() else "cpu"
 model.to(device)
-print("Modelo carregado")
+print(f"Modelo carregado em {device}")
 
 # ======================
 # CAPTURA RTSP
@@ -123,7 +127,8 @@ while True:
     gray = cv2.GaussianBlur(gray, (21, 21), 0)
     mask = fgbg.apply(gray)
     mask = cv2.threshold(mask, 200, 255, cv2.THRESH_BINARY)[1]
-    contornos, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contornos, _ = cv2.findContours(
+        mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     movimento = any(cv2.contourArea(c) > MOVIMENTO_MIN_AREA for c in contornos)
 
     # IA
@@ -183,4 +188,3 @@ while True:
 
 cap.release()
 cv2.destroyAllWindows()
-
